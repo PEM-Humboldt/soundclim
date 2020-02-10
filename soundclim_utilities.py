@@ -149,7 +149,7 @@ def joblib_features_to_csv(path_data, path_save):
     xdata.to_csv(path_save, index=False, sep=',')
     
 
-def features_to_csv(features_data, path_save):
+def features_to_csv(features_data):
     """
     Exports features object into a csv file
     
@@ -179,7 +179,7 @@ def features_to_csv(features_data, path_save):
             xdata = pd.concat([xdata, aux_df], axis=0, sort=False)
     
     xdata.reset_index(drop=True, inplace=True)
-    xdata.to_csv(path_save, index=False, sep=',')
+    return xdata
 
 
 def batch_feature_rois(rois_list, params_features, path_audio):
