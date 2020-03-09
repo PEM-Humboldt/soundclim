@@ -73,7 +73,7 @@ df_stratsample.to_csv(params_selrois['path_save'], index=False)
 from sklearn import manifold
 import matplotlib.pyplot as plt
 import seaborn as sns
-X = df_sel.loc[:,df.columns.str.startswith('shp')]
+X = df_sel.loc[:,df_sel.columns.str.startswith('shp')]
 tsne = manifold.TSNE(n_components=2, init='pca', random_state=0, 
                      n_iter=5000, verbose=1, perplexity=50)
 Y = tsne.fit_transform(X)
