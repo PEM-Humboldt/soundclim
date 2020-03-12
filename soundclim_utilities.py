@@ -494,9 +494,9 @@ def format_trainds(df, flims, wl, path_audio):
         else:
             s_roi = s[int(tlims[0]*fs):int(tlims[1]*fs)]
         # a memory leak occurs with numpy array. As a temporary solution, convert to list and then again to array.
-        s_roi = s_roi.tolist()
-        s_roi = np.array(s_roi)
-        audiolist.append(s_roi)
+        #s_roi = s_roi.tolist()
+        #s_roi = np.array(s_roi)
+        audiolist.append(s_roi.copy())
         
     ## write segments for manual annotations
     onset = (wl/2) - (df.tlen/2)

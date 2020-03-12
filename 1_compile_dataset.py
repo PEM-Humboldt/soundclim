@@ -81,27 +81,26 @@ sns.scatterplot(Y[:,0], Y[:,1], hue=df_sel.cluster, alpha=0.2,
                 palette=sns.color_palette('dark', n_colors=12))
 sns.despine()
 
+
 ## 6. FORMAT TRAINING DATASET
 from soundclim_utilities import format_trainds
 import numpy as np
 from scipy.io.wavfile import write
-wl = settings.trainds['wl']
-path_save = settings.trainds['path_save']
 df = pd.read_csv(settings.trainds['path_df'])
-train_data = format_trainds(df, settings.trainds['flims'], 
-                            wl, 
+train_data = format_trainds(df, 
+                            settings.trainds['flims'], 
+                            settings.trainds['wl'], 
                             settings.trainds['path_audio'])
 
 # write joblib object with all data
 joblib.dump(train_data, settings.trainds['path_save']+'trainds.joblib')
 # write audio file
-fs = 22050
 sx = np.concatenate(train_data['audio'], axis=0)
-write(path_save+'trainds.wav', fs, sx)
+write(settings.trainds['path_save']+'trainds.wav', 22050, sx)
 # write annotations
 seg = train_data['segments']
-onset = np.arange(0, seg.shape[0])*wl + seg.onset
-offset = np.arange(0, seg.shape[0])*wl + seg.offset
-audacity_annot = pd.DataFrame({'onset': onset, 'offset': offset})
-audacity_annot['label'] = np.arange(0,seg.shape[0])
-audacity_annot.to_csv(path_save+'trainds.txt', sep='\t', index=False, header=False)
+audacity_annot = pd.DataFrame({'onset': np.arange(0, seg.shape[0])*settings.trainds['wl'] + seg.onset, 
+                               'offset': np.arange(0, seg.shape[0])*settings.trainds['wl'] + seg.offset,
+                               'label': np.arange(0, seg.shape[0])})
+audacity_annot.to_csv(settings.trainds['path_save']+'trainds.txt', 
+                      sep='\t', index=False, header=False)
