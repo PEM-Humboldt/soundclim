@@ -463,3 +463,54 @@ def predictions_to_df(predictions, clf_lab_list):
     
     res['fname'] = pred_file['fname']
     return res
+
+def format_trainds(df, flims, wl, path_audio):
+    df['tlen'] = df.max_t - df.min_t
+    audiolist = list()
+    for idx, roi in df.iterrows():
+        print(idx+1, '/', len(df), 'processing rois')
+        fname_wav = path_audio + roi.fname
+        # define tlimits with window length
+        length = roi.max_t - roi.min_t
+        tlims = ((roi.min_t + length/2) - wl/2, (roi.min_t + length/2) + wl/2)
+        s, fs = sound.load(fname_wav)
+        s = sound.select_bandwidth(s, fs, lfc=flims[0], hfc=flims[1])
+        # #normalize?
+        rec_length = len(s)/fs
+        
+        # if time limits are outside the recording, add silence
+        if tlims[1] > rec_length:
+            # add silence at end
+            sil_len = tlims[1] - rec_length
+            silence = np.zeros(int(sil_len*fs))
+            s_roi = np.concatenate([s[int(tlims[0]*fs):], silence])
+        
+        elif tlims[0] < 0:
+            # add silence at begin
+            sil_len = abs(tlims[0])
+            silence = np.zeros(int(sil_len*fs))
+            s_roi = np.concatenate([silence, s[0:int(tlims[1]*fs)]])
+            
+        else:
+            s_roi = s[int(tlims[0]*fs):int(tlims[1]*fs)]
+        # a memory leak occurs with numpy array. As a temporary solution, convert to list and then again to array.
+        s_roi = s_roi.tolist()
+        s_roi = np.array(s_roi)
+        audiolist.append(s_roi)
+        
+    ## write segments for manual annotations
+    onset = (wl/2) - (df.tlen/2)
+    offset = (wl/2) + (df.tlen/2)
+    seg = pd.DataFrame({'onset': onset, 'offset': offset})
+    seg['label'] = 'NA'
+    
+    ## assign to object and save
+    train_data = dict()
+    idx_features = df.columns.str.startswith('shp') | (df.columns=='frequency')
+    train_data['roi_info'] = df[['fname','min_t','max_t','min_f','max_f']]
+    train_data['shape_features'] = df.loc[:,idx_features] 
+    train_data['label'] = seg.label
+    train_data['audio'] = audiolist
+    train_data['segments'] = seg[['onset','offset']]
+    train_data['maad_label'] = df.cluster
+    return train_data
