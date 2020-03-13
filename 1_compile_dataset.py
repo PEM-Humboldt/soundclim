@@ -99,8 +99,10 @@ sx = np.concatenate(train_data['audio'], axis=0)
 write(settings.trainds['path_save']+'trainds.wav', 22050, sx)
 # write annotations
 seg = train_data['segments']
+label_fmt = [i + '-'+ j for i, j in zip(train_data['maad_label'].astype(str), 
+                                        np.arange(seg.shape[0]).astype(str))]
 audacity_annot = pd.DataFrame({'onset': np.arange(0, seg.shape[0])*settings.trainds['wl'] + seg.onset, 
                                'offset': np.arange(0, seg.shape[0])*settings.trainds['wl'] + seg.offset,
-                               'label': np.arange(0, seg.shape[0])})
+                               'label': label_fmt})
 audacity_annot.to_csv(settings.trainds['path_save']+'trainds.txt', 
                       sep='\t', index=False, header=False)
