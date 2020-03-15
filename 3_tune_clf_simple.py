@@ -18,7 +18,7 @@ from classif_fcns import (tune_clf_rand,
                           ismember)
 
 ## Set variables
-path_df = '../data_training/traindb_shayii_features_mannot.txt'
+path_df = './trainds/trainds_features_mannot.csv'
 n_splits_cv = 5  # for cross validation tuning
 n_iter = 20  # nuber of iteration for randomized search
 
@@ -61,8 +61,8 @@ df['pred'] = y_pred
 th = 0.5
 y_bin = np.array(y_pred>th,dtype=int)
 idx = misclassif_idx(y_true, y_bin)
-df.iloc[idx['fp']][['lab_wname','pred','obs']]
-df.iloc[idx['fn']][['lab_wname','pred','obs']]
+df.iloc[idx['fp']][['lab_wname','pred','index']]
+df.iloc[idx['fn']][['lab_wname','pred','index']]
 
 
 # Save tuned classifier, training data, filename of source code 
