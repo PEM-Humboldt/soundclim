@@ -19,13 +19,15 @@ from classif_fcns import (tune_clf_rand,
 
 ## Set variables
 path_df = './trainds/trainds_features_mannot.csv'
-n_splits_cv = 5  # for cross validation tuning
-n_iter = 20  # nuber of iteration for randomized search
+n_splits_cv = 10  # for cross validation tuning
+n_iter = 100  # nuber of iteration for randomized search
 
 # load data
 df = pd.read_csv(path_df)
-df.dropna(axis=0, inplace=True)
 
+# drop na values and any other label that might be uninformative or confusing
+df.dropna(axis=0, inplace=True)
+df = df.loc[~df.lab_wname.isin(['1_vfar','1_ago']),:]
 df.lab_gt.value_counts()
 df.lab_wname.value_counts()
 
@@ -68,11 +70,11 @@ df.iloc[idx['fn']][['lab_wname','pred','index']]
 # Save tuned classifier, training data, filename of source code 
 import sklearn
 import joblib
-fname_save_tuned_clf = '../data_clf/tuned_clf_20200131.joblib'
+fname_save_tuned_clf = './data_clf/tuned_clf_20200316.joblib'
 clf_tuned_persist = {'clf_tuned': clf_tuned,
                      'sklearn_version': sklearn.__version__,
                      'source_code': 'detector_hfaber/scripts/tune_clf_simple.py',
                      'training_data': {'X' : X, 'y_true' : y_true},
-                     'description': 'Primeras pruebas de clasificacion basado en datasets en cortes. 07/01/2020'}
+                     'description': 'Classifiers test'}
 
 joblib.dump(clf_tuned_persist, fname_save_tuned_clf)
