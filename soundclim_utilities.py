@@ -200,7 +200,9 @@ def batch_feature_rois(rois_list, params_features, path_audio):
 
     Returns:
     -------
-        Saves a joblib file to disk. Does not return any variable
+        info_features: dic
+            Dictionary with features and all the parameters used to compute the features.
+            Included keys: features, parameters_df, opt_shape, opt_spectro
             
     """    
     ## TODO: when the time limits are too short, the function has problems
@@ -252,7 +254,7 @@ def batch_feature_rois(rois_list, params_features, path_audio):
             features.append({'fname':fname, 'features': aux_df})
     
     
-    # Save data to binary object
+    # Arranges the data into a dictionary
     info_features = {'features': features,
                      'parameters_df': params,
                      'opt_shape': opt_shape,
@@ -368,27 +370,6 @@ def listdir_pattern(path_dir, ends_with=None):
             new_list.append(names)
     return new_list
 
-def listdir_pattern(path_dir, ends_with=None):
-    """
-    Wraper function from os.listdir to include a filter to search for patterns
-    
-    Parameters
-    ----------
-        path_dir: str
-            path to directory
-        ends_with: str
-            pattern to search for at the end of the filename
-    Returns
-    -------
-    """
-    flist = listdir(path_dir)
-    
-    new_list = []
-    for names in flist:
-         if names.endswith(ends_with):
-            new_list.append(names)
-    return new_list
-
 def read_audacity_annot (audacity_filename):
     """
     Read audacity annotations file (or labeling file) and return a Pandas Dataframe
@@ -396,12 +377,12 @@ def read_audacity_annot (audacity_filename):
     
     Parameters
     ----------
-    audacity_filename : String
+    audacity_filename : str
         Path to the audacity file
 
     Returns
     -------
-    tab_out : Pandas Dataframe 
+    tab_out : pandas DataFrame 
         Colormap type used by matplotlib
     
     References
@@ -465,6 +446,31 @@ def predictions_to_df(predictions, clf_lab_list):
     return res
 
 def format_trainds(df, flims, wl, path_audio):
+    """
+    Arranges all the training data into a dictionary for easy and compact access.
+    
+    Parameters
+    ----------
+    df : pandas DataFrame
+        DataFrame with information on the regions of interest to be arranged.
+        The DataFrame must have the columns: fname, min_t, max_t.
+    flims : tuple or list
+        Minimum and maximum frequency limits of the band pass filter. This
+        is used to filter unwanted sounds and improve the manual analysis.
+    wl : int or float
+        Window length (in seconds) of each region of intrest. While the regions 
+        have a specified duration, with this argument it is possible to increase
+        the window of observation, allowing to have a wider context to analyse 
+        the audio. Recomended minimum 2 seconds.
+    path_audio : str
+        Path to the directory where all the raw audio files are stored
+
+    Returns
+    -------
+    train_data : dict
+        A dictionary with the keys: roi_info, shape_features, label, audio, segments and maad_label
+
+    """
     df['tlen'] = df.max_t - df.min_t
     audiolist = list()
     for idx, roi in df.iterrows():
