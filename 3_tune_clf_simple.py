@@ -34,9 +34,9 @@ df.lab_wname.value_counts()
 # assign
 X = df.loc[:,df.columns.str.startswith('shp')]
 y_true = df.loc[:,'lab_gt']
-clf_opt=['rf','svm','adb']
 
 # train - tune clf
+clf_opt=['rf','svm','adb']
 clf_tuned = dict()
 for clf_name in clf_opt:
     clf_gs = tune_clf_rand(X, y_true, clf_name, 

@@ -471,10 +471,10 @@ def format_trainds(df, flims, wl, path_audio):
         A dictionary with the keys: roi_info, shape_features, label, audio, segments and maad_label
 
     """
+    print('Aligning ROIs, number of observations:', len(df))
     df['tlen'] = df.max_t - df.min_t
     audiolist = list()
     for idx, roi in df.iterrows():
-        print(idx+1, '/', len(df), 'processing rois')
         fname_wav = path_audio + roi.fname
         # define tlimits with window length
         length = roi.max_t - roi.min_t
@@ -499,9 +499,7 @@ def format_trainds(df, flims, wl, path_audio):
             
         else:
             s_roi = s[int(tlims[0]*fs):int(tlims[1]*fs)]
-        # a memory leak occurs with numpy array. As a temporary solution, convert to list and then again to array.
-        #s_roi = s_roi.tolist()
-        #s_roi = np.array(s_roi)
+
         audiolist.append(s_roi.copy())
         
     ## write segments for manual annotations
