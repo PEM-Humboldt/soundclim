@@ -19,7 +19,7 @@ from soundclim_utilities import (features_to_csv,
                                  listdir_pattern)
 
 ## 1. CALIBRATE FIND ROIS
-s, fs = sound.load(settings.detection['path_template'])
+s, fs = sound.load(settings.path_audio['template'])
 rois = find_rois_cwt(s, fs, 
                      flims = settings.detection['flims'], 
                      tlen = settings.detection['tlen'], 
@@ -29,16 +29,16 @@ print(rois)
 
 
 ## 2. BATCH FIND ROIS
-flist = listdir_pattern(settings.detection['path_audio'], ends_with='.wav')
+flist = listdir_pattern(settings.path_audio['train'], ends_with='.wav')
 flist = pd.DataFrame(flist, columns=['fname'])
 detection_data = batch_find_rois(flist, settings.detection, 
-                                 settings.detection['path_audio'])
+                                 settings.path_audio['train'])
 joblib.dump(detection_data, settings.detection['path_save'])
 
 
 ## 3. BATCH FEATURE ROIS
 rois_list = detection_data['detections']
-features = batch_feature_rois(rois_list, settings.features, settings.features['path_audio'])
+features = batch_feature_rois(rois_list, settings.features, settings.path_audio['train'])
 joblib.dump(features, settings.features['path_save'])
 # Write to csv
 df = features_to_csv(features)
@@ -90,7 +90,7 @@ df = pd.read_csv(settings.trainds['path_df'])
 train_data = format_trainds(df, 
                             settings.trainds['flims'], 
                             settings.trainds['wl'], 
-                            settings.trainds['path_audio'])
+                            settings.path_audio['train'])
 
 # write joblib object with all data
 joblib.dump(train_data, settings.trainds['path_save']+'trainds.joblib')

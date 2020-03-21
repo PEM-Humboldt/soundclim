@@ -224,8 +224,8 @@ def batch_feature_rois(rois_list, params_features, path_audio):
         else:
             # load materials: sound, spectrogram
             s, fs = sound.load(path_audio+fname)
-            im, dt, df, ext = sound.spectrogram(s, fs, nperseg=opt_spec['wl'], 
-                                                overlap=opt_spec['ovlp'], fcrop=flims, 
+            im, dt, df, ext = sound.spectrogram(s, fs, nperseg=opt_spec['nperseg'], 
+                                                overlap=opt_spec['overlap'], fcrop=flims, 
                                                 rescale=False, db_range=opt_spec['db_range'])
             
             # format rois to bbox

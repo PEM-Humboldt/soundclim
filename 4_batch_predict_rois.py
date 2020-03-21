@@ -13,10 +13,11 @@ import pandas as pd
 import joblib
 from classif_fcns import tune_clf_rand, print_report, misclassif_idx
 from soundclim_utilities import batch_predict_rois, listdir_pattern, predictions_to_df
+import settings
 
 # ----------  Set variables -------- #
 path_audio_db =  '/Users/jsulloa/Dropbox/PostDoc/Soundclim/audio_sites/BETANIA/test/'  # Location of audio files
-path_tuned_clf='../data_clf/tuned_clf_20200131.joblib' # location of classifiers
+path_tuned_clf='../models/tuned_clf_20200131.joblib' # location of classifiers
 #path_save_predictions =  '../scinhayii_alt/predfile_campobelo.pkl' # filename where the predictions are to be saved
 # ----------------------------------- #
 
@@ -27,12 +28,12 @@ flist = pd.DataFrame(flist, columns=['fname'])
 
 
 # Fixed variables, DO NOT modify
-params = {'sample_rate_wav': 22050,
-          'flims' : (1000, 4000),
-          'tlen' : 0.3,
-          'th' : 1e-4,
-          'opt_spec' : {'nperseg': 512, 'overlap': 0.5, 'db_range': 250},
-          'opt_shape_str' : 'med'}
+params = {'flims' : settings.detection['flims'],
+          'tlen' : settings.detection['tlen'],
+          'th' : settings.detection['th'],
+          'opt_spec' : settings.features['opt_spec'],
+          'sample_rate_wav': settings.features['sample_rate'],
+          'opt_shape_str' : settings.features['opt_shape_str']}
 
 # Batch predict on files
 clfs_data = joblib.load(path_tuned_clf)
