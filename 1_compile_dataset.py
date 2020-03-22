@@ -33,8 +33,6 @@ flist = listdir_pattern(settings.path_audio['train'], ends_with='.wav')
 flist = pd.DataFrame(flist, columns=['fname'])
 detection_data = batch_find_rois(flist, settings.detection, 
                                  settings.path_audio['train'])
-joblib.dump(detection_data, settings.detection['path_save'])
-
 
 ## 3. BATCH FEATURE ROIS
 rois_list = detection_data['detections']
