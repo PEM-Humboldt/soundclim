@@ -1,58 +1,79 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Batch predict presence absence of sounds of interest
+BATCH PREDICT 
+Presence absence of sounds of soundmarks
 
-VERSION 0.2
+VERSION 0.3
 Created on April 2019 (version 0.1)
 Modified on May 2019 (version 0.2)
 @author: jseb.ulloa@gmail.com
 """
-## Import modules
+
 import pandas as pd
 import joblib
-from classif_fcns import tune_clf_rand, print_report, misclassif_idx
-from soundclim_utilities import batch_predict_rois, listdir_pattern, predictions_to_df
 import settings
+from classif_fcns import print_report, misclassif_idx
+from soundclim_utilities import (features_to_csv, 
+                                 batch_find_rois, 
+                                 batch_feature_rois, 
+                                 listdir_pattern)
 
-# ----------  Set variables -------- #
-path_audio_db =  '/Users/jsulloa/Dropbox/PostDoc/Soundclim/audio_sites/BETANIA/test/'  # Location of audio files
-path_tuned_clf='../models/tuned_clf_20200131.joblib' # location of classifiers
-#path_save_predictions =  '../scinhayii_alt/predfile_campobelo.pkl' # filename where the predictions are to be saved
-# ----------------------------------- #
 
-# load filelist and set format
-flist = listdir_pattern(path_audio_db, ends_with='.wav')
+## 1. BATCH FIND ROIS
+flist = listdir_pattern(settings.path_audio['test'], ends_with='.wav')
 flist = pd.DataFrame(flist, columns=['fname'])
-#flist = flist.loc[0:9]  # for testing purposes uncomment this line
+detection_data = batch_find_rois(flist, settings.detection, 
+                                 settings.path_audio['test'])
+
+## 2. BATCH FEATURE ROIS
+rois_list = detection_data['detections']
+features = batch_feature_rois(rois_list, settings.features, settings.path_audio['test'])
+df = features_to_csv(features)
+# Filter rois by duration
+tlen_min, tlen_max = settings.selrois['tlen_lims']
+rois_tlen = df.max_t - df.min_t
+idx_keep = (rois_tlen > tlen_min) & (rois_tlen < tlen_max)
+df = df.loc[idx_keep,:]
+# Write features dataframe to disk
+df.to_csv('../models/test_rois_features.csv', index=False, sep=',')
+
+## 3. PREDICT ROIS
+tuned_clfs = joblib.load('../models/tuned_clf_20200316.joblib')
+clf = tuned_clfs['clf_tuned']['rf']
+X = df.loc[:,df.columns.str.startswith('shp')]
+df['proba'] = clf.predict_proba(X)[:,1]
 
 
-# Fixed variables, DO NOT modify
-params = {'flims' : settings.detection['flims'],
-          'tlen' : settings.detection['tlen'],
-          'th' : settings.detection['th'],
-          'opt_spec' : settings.features['opt_spec'],
-          'sample_rate_wav': settings.features['sample_rate'],
-          'opt_shape_str' : settings.features['opt_shape_str']}
-
-# Batch predict on files
-clfs_data = joblib.load(path_tuned_clf)
-tuned_clfs = clfs_data['clf_tuned']
-predictions = batch_predict_rois(flist, tuned_clfs, params, path_audio_db)
-
-# Evaluate presence-absence predictions
-gt = pd.read_csv('../data_test/mannot_files_scinhayii_betania.csv')
-y_pred = predictions_to_df(predictions,  ['1.0_svm', '1.0_rf', '1.0_adb'])
-
+## 4. ARRANGE PREDICTIONS ROIS -> FILE
+# arrange output by file
+pred_file = df.loc[:,['fname','proba']].groupby('fname').max()
+pred_file.reset_index(inplace=True)
+# append files with no detections
+files_norois = flist.loc[~flist.fname.isin(pred_file.fname),:]
+files_norois['proba'] = -1
+pred_file = pred_file.append(files_norois, ignore_index=True)
+pred_file.sort_values(by='fname', inplace=True)
+# load ground truth file
+gt_file = pd.read_csv('../data/test/mannot_files_scinhayii_betania.csv')
 # sort elements according to filename
-y_true_file = gt.sort_values('fname').reset_index(drop=True)
-y_pred_file = y_pred.sort_values('fname').reset_index(drop=True)
-
-# Check manually
-if y_true_file.fname.equals(y_pred_file.fname):
+gt_file = gt_file.sort_values('fname').reset_index(drop=True)
+pred_file = pred_file.sort_values('fname').reset_index(drop=True)
+# check correct alignment
+if gt_file.fname.equals(pred_file.fname):
     print('All elements are equal')
+    pred_file['lab_gt'] = gt_file.lab_gt
 else:
     print('Elements are not equal, check manually')
     print('pd.concat({\'true\':y_true_file.fname,\'pred\':y_pred_file.fname}, axis=1')
 
-print_report(y_true_file['lab_gt'], y_pred_file['1.0_svm'], th=0.5, curve_type='roc')
+
+## 5. CHECK PERFORMANCE AND TYPES OF ERROR
+th = 0.5
+print_report(pred_file['lab_gt'], pred_file['proba'], th=th, curve_type='roc')
+
+## Analyze the type of errors
+y_bin = np.array(pred_file.proba>th, dtype=int)
+idx = misclassif_idx(gt_file.lab_gt, y_bin)
+pred_file.iloc[idx['fp']][['fname','proba', 'lab_gt']]
+pred_file.iloc[idx['fn']][['fname','proba', 'lab_gt']]
