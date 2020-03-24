@@ -23,13 +23,12 @@ Note: utility functions are stored in the module soundclim_utilities.py and clas
 Compile train dataset [1_compile_dataset.py](./1_compile_dataset.py)
 - Segment and characterise the regions of interest
 - Select ROIs to manually annotate and export comma separated file
+- Format the training dataset with associted metadata as an RData file
+- Mix a single audio file with all ROIs and export as wav file with text annotation file
 
-Format training dataset for manual annotation
-- Format the training dataset with associted metadata as an RData file [2_format_trainds.R](2_format_trainds.R)
-- Mix a single audio file with all ROIs and export as wav file with text annotation file [3_mix_audio_trainds.R](3_mix_audio_trainds.R)
-- Manually annotate ROIs using Audacity
-- Export annotation and match with features [4_export_features_and_mannot_to_csv.R](4_export_features_and_mannot_to_csv.R)
+Manually annotate ROIs using Audacity
+- Export annotation and match with features [2_export_features_mannot_tocsv](2_export_features_mannot_tocsv)
 
 Tune statistical classifier and deploy
-- Train and tune multiple statistical classifiers [5_tune_clf_simple.py](5_tune_clf_simple.py)
-- Predict and validate using test dataset [6_batch_predict_rois.py](6_batch_predict_rois.py)
+- Train and tune multiple statistical classifiers [3_tune_clf_simple.py](3_tune_clf_simple.py)
+- Predict and validate using test dataset [4_batch_predict_rois.py](4_batch_predict_rois.py)
