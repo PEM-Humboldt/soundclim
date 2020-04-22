@@ -61,7 +61,7 @@ n_max = settings.selrois['n_samples_per_cluster']
 gby = df_sel.groupby('cluster', group_keys=False)
 # if cluster is smaller than n_max, take all samples from cluster
 df_stratsample = gby.apply(lambda x: x.sample(n= n_max, random_state=42) if len(x)> n_max else x)
-df_stratsample.reset_index()
+df_stratsample.reset_index(inplace=True)
 df_stratsample.to_csv(settings.selrois['path_save'], index=False)
 
 
