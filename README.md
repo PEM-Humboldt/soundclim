@@ -33,3 +33,5 @@ Format training dataset for manual annotation
 Tune statistical classifier and deploy
 - Train and tune multiple statistical classifiers [5_tune_clf_simple.py](5_tune_clf_simple.py)
 - Predict and validate using test dataset [6_batch_predict_rois.py](6_batch_predict_rois.py)
+
+<img src="workflow.png" alt="drawing" width="600"/>
