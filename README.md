@@ -27,7 +27,7 @@ Compile train dataset [1_compile_dataset.py](./1_compile_dataset.py)
 Format training dataset for manual annotation
 - Format the training dataset with associted metadata as an RData file [2_format_trainds.R](2_format_trainds.R)
 - Mix a single audio file with all ROIs and export as wav file with text annotation file [3_mix_audio_trainds.R](3_mix_audio_trainds.R)
-- Manually annotate ROIs using Audacity
+- Manually annotate ROIs using Audacity [manual_annotation_protocol.html](manual_annotation_protocol.html)
 - Export annotation and match with features [4_export_features_and_mannot_to_csv.R](4_export_features_and_mannot_to_csv.R)
 
 Tune statistical classifier and deploy
