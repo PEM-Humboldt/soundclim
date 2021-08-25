@@ -1,8 +1,18 @@
 # Soundclim analysis workflow
  
-This repository compiles scripts and modules to search for soundmarks in audio recordings.
+This repository compiles scripts and modules to search for soundmarks in audio recordings using machine learning.
 
-## Before starting
+## Prerequisites
+
+- Python version 3.6 or higher and the following packages: numpy, pandas, scipy, scikit-image, scikit-learn, scikit-maad. To install, run in your terminal console:
+```
+pip install numpy pandas scipy scikit-image scikit-learn scikit-maad
+```
+
+
+## How to run
+
+### Data preparation
 
 Check consistency of the full dataset: sample rate, number of channels, bits per sample
 
@@ -17,7 +27,7 @@ mkdir samp
 for i in *.wav; do sox $i `echo ./samp/$i` rate 22050 ;done
 ```
 
-## Workflow
+### Workflow
 Note: utility functions are stored in the module soundclim_utilities.py and classif_fcns.py
 
 Compile train dataset [1_compile_dataset.py](./1_compile_dataset.py)
@@ -35,3 +45,9 @@ Tune statistical classifier and deploy
 - Predict and validate using test dataset [6_batch_predict_rois.py](6_batch_predict_rois.py)
 
 <img src="workflow.png" alt="drawing" width="800"/>
+
+## License
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Authors and contact
+[Juan Sebastián Ulloa](https://github.com/juansulloa)
